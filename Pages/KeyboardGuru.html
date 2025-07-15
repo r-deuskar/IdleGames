@@ -577,7 +577,7 @@
             return fetch('../Resources/Words.json')
                 .then(response => response.json())
                 .then(data => {
-                    wordsList = data.thousandwords;
+                    wordsList = data["commonthousandwords"];
                     hideError();
                     return true;
                 })
