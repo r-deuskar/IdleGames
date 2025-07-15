@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Idle Games</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(ellipse at center, #0a0a0a 0%, #000000 100%);
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Arial', monospace;
+            min-height: 100vh;
+            color: #00ffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(0, 255, 0, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 3rem auto 3rem auto;
+            padding: 2rem 1rem;
+            min-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 2.5rem;
+            text-align: center;
+            letter-spacing: 2px;
+            text-shadow:
+                0 0 10px #00ffff,
+                0 0 20px #00ffff,
+                0 0 40px #00ffff,
+                0 0 80px #ff00ff;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #00ff80);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: neonPulse 2s ease-in-out infinite alternate;
+        }
+        @keyframes neonPulse {
+            0% {
+                text-shadow:
+                    0 0 10px #00ffff,
+                    0 0 20px #00ffff,
+                    0 0 40px #00ffff;
+            }
+            100% {
+                text-shadow:
+                    0 0 20px #ff00ff,
+                    0 0 40px #00ffff,
+                    0 0 60px #00ff80;
+            }
+        }
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2.5rem 2.5rem;
+            width: 100%;
+            max-width: 900px;
+            margin-top: 1rem;
+            justify-items: center;
+        }
+        .game-card {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 2.2rem 1.5rem 2rem 1.5rem;
+            box-shadow:
+                0 0 40px rgba(0, 255, 255, 0.3),
+                inset 0 0 40px rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+            max-width: 320px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+        }
+        .game-card:hover {
+            transform: translateY(-8px) scale(1.04);
+            box-shadow:
+                0 0 60px #00ffff,
+                0 0 80px #ff00ff,
+                0 0 100px #00ff80;
+            border-color: #00ffff;
+        }
+        .game-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 1.2rem;
+            text-shadow:
+                0 0 10px #00ffff,
+                0 0 20px #ff00ff;
+        }
+        .play-btn {
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            color: #000;
+            border: none;
+            padding: 0.8em 2em;
+            font-size: 1.1em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 1.2em;
+            box-shadow:
+                0 0 20px rgba(0, 255, 255, 0.5),
+                inset 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+        .play-btn:hover {
+            background: linear-gradient(45deg, #ff00ff, #00ff80);
+            color: #fff;
+            box-shadow:
+                0 0 30px #ff00ff,
+                0 5px 20px rgba(0, 0, 0, 0.3),
+                inset 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+        @media (max-width: 900px) {
+            .games-grid {
+                grid-template-columns: repeat(2, 1fr);
+                max-width: 600px;
+            }
+        }
+        @media (max-width: 600px) {
+            .title { font-size: 2.2rem; }
+            .games-grid { grid-template-columns: 1fr; max-width: 95vw; }
+            .game-card { padding: 1.2rem 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">Idle Games</div>
+        <div class="games-grid">
+            <div class="game-card">
+                <div class="game-title">Aim Trainer</div>
+                <a href="Pages/AimTrainer.html"><button class="play-btn">Play</button></a>
+            </div>
+            <div class="game-card">
+                <div class="game-title">Keyboard Guru</div>
+                <a href="Pages/KeyboardGuru.html"><button class="play-btn">Play</button></a>
+            </div>
+            <div class="game-card">
+                <div class="game-title">Quick Math</div>
+                <a href="Pages/QuickMath.html"><button class="play-btn">Play</button></a>
+            </div>
+            <div class="game-card">
+                <div class="game-title">Reaction Responder</div>
+                <a href="Pages/ReactionResponder.html"><button class="play-btn">Play</button></a>
+            </div>
+            <div class="game-card">
+                <div class="game-title">Word Scrambler</div>
+                <a href="Pages/WordScrambler.html"><button class="play-btn">Play</button></a>
+            </div>
+            <div class="game-card">
+                <div class="game-title">Pattern Recall</div>
+                <a href="Pages/PatternRecall.html"><button class="play-btn">Play</button></a>
+            </div>
+        </div>
+    </div>
+    <footer class="footer">-by Rohan Deuskar</footer>
+</body>
+<style>
+.footer {
+    width: 100vw;
+    text-align: center;
+    color: #00ffff;
+    font-family: inherit;
+    font-size: 1.1rem;
+    padding: 1.2rem 0 1.2rem 0;
+    background: rgba(0,0,0,0.7);
+    border-top: 1px solid rgba(0,255,255,0.18);
+    box-shadow: 0 -2px 20px rgba(0,255,255,0.08);
+    letter-spacing: 1px;
+    margin-top: 2rem;
+    position: relative;
+    z-index: 10;
+    text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff44;
+}
+</style>

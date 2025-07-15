@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pattern Recall</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(ellipse at center, #0a0a0a 0%, #000000 100%);
+            font-family: 'Arial', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #00ffff;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(0, 255, 0, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        .navbar {
+            width: 100vw;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,255,255,0.25);
+            box-shadow: 0 2px 20px rgba(0,255,255,0.08);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+        }
+        .nav-home {
+            color: #00ffff;
+            font-size: 1.2rem;
+            font-family: inherit;
+            text-decoration: none;
+            margin-left: 2.5rem;
+            padding: 0.5em 1.5em;
+            border-radius: 30px;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff44;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        }
+        .nav-home:hover {
+            background: linear-gradient(45deg, #ff00ff, #00ff80);
+            color: #fff;
+            box-shadow: 0 0 20px #ff00ff, 0 0 30px #00ff80;
+        }
+        @media (max-width: 600px) {
+            .navbar { padding: 0.5rem 0; }
+            .nav-home { margin-left: 1rem; font-size: 1rem; padding: 0.4em 1em; }
+        }
+        body { padding-top: 70px !important; }
+        .game-container {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow:
+                0 0 40px rgba(0, 255, 255, 0.3),
+                inset 0 0 40px rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            margin: 0 auto;
+        }
+        h1 {
+            margin: 0 0 20px 0;
+            font-size: 2.5em;
+            text-shadow:
+                0 0 10px #00ffff,
+                0 0 20px #00ffff,
+                0 0 40px #00ffff;
+            color: #ffffff;
+        }
+        .instructions {
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 50px);
+            grid-template-rows: repeat(4, 50px);
+            gap: 12px;
+            justify-content: center;
+            margin: 30px auto 20px auto;
+        }
+        .cell {
+            width: 50px;
+            height: 50px;
+            background: rgba(0,0,0,0.8);
+            border: 2px solid rgba(0,255,255,0.5);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 1.5em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 0 10px #00ffff44;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+            user-select: none;
+        }
+        .cell.selected {
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            color: #000;
+            border-color: #00ffff;
+            box-shadow: 0 0 20px #00ffff88;
+        }
+        .cell.pattern {
+            background: linear-gradient(45deg, #ff00ff, #00ff80);
+            color: #fff;
+            border-color: #ff00ff;
+            box-shadow: 0 0 20px #ff00ff88;
+        }
+        .btn {
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0.5em auto 0.5em auto;
+            box-shadow:
+                0 0 20px rgba(0, 255, 255, 0.5),
+                inset 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+        .btn:hover {
+            background: linear-gradient(45deg, #ff00ff, #00ff80);
+            color: #fff;
+            box-shadow: 0 0 30px #ff00ff, 0 5px 20px rgba(0, 0, 0, 0.3), inset 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+        .footer {
+            width: 100vw;
+            text-align: center;
+            color: #00ffff;
+            font-family: inherit;
+            font-size: 1.1rem;
+            padding: 1.2rem 0 1.2rem 0;
+            background: rgba(0,0,0,0.7);
+            border-top: 1px solid rgba(0,255,255,0.18);
+            box-shadow: 0 -2px 20px rgba(0,255,255,0.08);
+            letter-spacing: 1px;
+            margin-top: 2rem;
+            position: relative;
+            z-index: 10;
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff44;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-home">Home</a>
+    </nav>
+    <div class="game-container">
+        <h1>Pattern Recall</h1>
+        <div id="gameInfo" style="margin-bottom:10px;font-size:1.1em;"></div>
+        <div id="timer" style="font-size:1.3em;margin-bottom:10px;"></div>
+        <div class="instructions">Memorize the pattern of numbers in the grid. You have <b>5 seconds</b>!<br>After that, recreate the pattern from memory.</div>
+        <div id="patternGrid" class="pattern-grid"></div>
+        <button id="startBtn" class="btn">Start Game</button>
+        <div id="result" style="margin-top:18px;font-size:1.2em;"></div>
+    </div>
+    <footer class="footer">-by Rohan Deuskar</footer>
+    <script>
+        const gridSize = 4;
+        const showTime = 5000;
+        let pattern = [];
+        let userPattern = [];
+        let showing = false;
+        let canSelect = false;
+        let level = 1;
+        let score = 0;
+        const maxLevel = gridSize * gridSize;
+        const patternGrid = document.getElementById('patternGrid');
+        const startBtn = document.getElementById('startBtn');
+        const resultDiv = document.getElementById('result');
+        const gameInfo = document.getElementById('gameInfo');
+        let selectionStatus = [];
+        const timerDiv = document.getElementById('timer');
+        let showTimerInterval = null;
+        let answerTimerInterval = null;
+        let answerTimeLeft = 0;
+
+        function getRandomPattern(num) {
+            // Randomly select 'num' unique cells and assign numbers 1-num in random order
+            let cells = [];
+            for (let i = 0; i < gridSize * gridSize; i++) cells.push(i);
+            let chosen = [];
+            while (chosen.length < num) {
+                let idx = Math.floor(Math.random() * cells.length);
+                chosen.push(cells.splice(idx, 1)[0]);
+            }
+            let nums = [];
+            for (let i = 1; i <= num; i++) nums.push(i);
+            for (let i = nums.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [nums[i], nums[j]] = [nums[j], nums[i]];
+            }
+            let patternArr = Array(gridSize * gridSize).fill(null);
+            for (let i = 0; i < num; i++) patternArr[chosen[i]] = nums[i];
+            return patternArr;
+        }
+
+        function renderGrid(patternArr, highlight=false, showResult=false) {
+            patternGrid.innerHTML = '';
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                if (patternArr[i] !== null && highlight) {
+                    cell.textContent = patternArr[i];
+                    cell.classList.add('pattern');
+                } else if (userPattern[i] !== undefined && userPattern[i] !== null) {
+                    cell.textContent = userPattern[i];
+                    if (showResult) {
+                        if (selectionStatus[i] === true) {
+                            cell.classList.add('selected');
+                        } else if (selectionStatus[i] === false) {
+                            cell.style.background = 'linear-gradient(45deg, #ff0040, #ff8080)';
+                            cell.style.color = '#fff';
+                            cell.style.borderColor = '#ff0040';
+                            cell.style.boxShadow = '0 0 20px #ff004088';
+                        }
+                    } else {
+                        cell.classList.add('selected');
+                    }
+                }
+                cell.addEventListener('click', () => {
+                    if (!canSelect) return;
+                    if (userPattern[i] !== undefined && userPattern[i] !== null) return;
+                    // Find next available number
+                    let nextNum = 1;
+                    while (userPattern.includes(nextNum) && nextNum <= level) nextNum++;
+                    if (nextNum > level) return;
+                    userPattern[i] = nextNum;
+                    renderGrid(pattern, false);
+                });
+                patternGrid.appendChild(cell);
+            }
+        }
+
+        function updateGameInfo() {
+            gameInfo.innerHTML = `<b>Level:</b> ${level} / ${maxLevel} &nbsp; | &nbsp; <b>Score:</b> ${score}`;
+        }
+
+        function showMemorizeTimer() {
+            let timeLeft = showTime / 1000;
+            timerDiv.innerHTML = `Memorize: <br>${timeLeft} `;
+            showTimerInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    timerDiv.innerHTML = `Memorize: <br>${timeLeft}`;
+                } else {
+                    clearInterval(showTimerInterval);
+                    timerDiv.innerHTML = '';
+                }
+            }, 1000);
+        }
+
+        function startAnswerTimer() {
+            answerTimeLeft = 30;
+            timerDiv.innerHTML = `Time left: <br>${answerTimeLeft}`;
+            answerTimerInterval = setInterval(() => {
+                answerTimeLeft--;
+                if (answerTimeLeft > 0) {
+                    timerDiv.textContent = `Time left: <br>${answerTimeLeft}`;
+                } else {
+                    clearInterval(answerTimerInterval);
+                    timerDiv.textContent = '';
+                    canSelect = false;
+                    resultDiv.innerHTML = `<span style="color:#ff0040;text-shadow:0 0 10px #ff0040;">Time's up! You didn't finish in 30 seconds. Game Over! Final Score: <b>${score}</b> / ${((maxLevel*(maxLevel+1))/2)}</span>`;
+                    startBtn.textContent = 'Restart Game';
+                    startBtn.style.display = 'inline-block';
+                    renderGrid(pattern, false, true);
+                }
+            }, 1000);
+        }
+
+        function clearAllTimers() {
+            if (showTimerInterval) clearInterval(showTimerInterval);
+            if (answerTimerInterval) clearInterval(answerTimerInterval);
+            timerDiv.textContent = '';
+        }
+
+        function startLevel() {
+            clearAllTimers();
+            pattern = getRandomPattern(level);
+            userPattern = Array(gridSize * gridSize).fill(null);
+            showing = true;
+            canSelect = false;
+            resultDiv.textContent = '';
+            updateGameInfo();
+            renderGrid(pattern, true);
+            showMemorizeTimer();
+            setTimeout(() => {
+                showing = false;
+                canSelect = true;
+                renderGrid(pattern, false);
+                startAnswerTimer();
+            }, showTime);
+        }
+
+        function checkResult() {
+            clearAllTimers();
+            let correct = 0;
+            selectionStatus = Array(gridSize * gridSize).fill(null);
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                if (pattern[i] !== null && pattern[i] === userPattern[i]) {
+                    correct++;
+                    selectionStatus[i] = true;
+                } else if (userPattern[i] !== null && userPattern[i] !== undefined) {
+                    selectionStatus[i] = false;
+                }
+            }
+            score += correct;
+            updateGameInfo();
+            renderGrid(pattern, false, true);
+            const minToPass = Math.ceil(level / 2);
+            if (correct < minToPass) {
+                resultDiv.innerHTML = `<span style="color:#ff0040;text-shadow:0 0 10px #ff0040;">Game Over! You got ${correct}/${level} correct (need at least ${minToPass} to continue). Final Score: <b>${score}</b> / ${((maxLevel*(maxLevel+1))/2)}</span>`;
+                startBtn.textContent = 'Restart Game';
+                startBtn.style.display = 'inline-block';
+                canSelect = false;
+            } else if (level === maxLevel) {
+                resultDiv.innerHTML = `<span style="color:#00ff80;text-shadow:0 0 10px #00ff80;">Game Over! Final Score: <b>${score}</b> / ${((maxLevel*(maxLevel+1))/2)}</span>`;
+                startBtn.textContent = 'Restart Game';
+                startBtn.style.display = 'inline-block';
+                canSelect = false;
+            } else {
+                resultDiv.innerHTML = `<span style="color:#00ff80;text-shadow:0 0 10px #00ff80;">You got ${correct}/${level} correct. Click Next Level!</span>`;
+                startBtn.textContent = 'Next Level';
+                startBtn.style.display = 'inline-block';
+                canSelect = false;
+            }
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (startBtn.textContent === 'Start Game' || startBtn.textContent === 'Restart Game') {
+                level = 1;
+                score = 0;
+                startBtn.style.display = 'none';
+                updateGameInfo();
+                startLevel();
+            } else if (startBtn.textContent === 'Next Level') {
+                level++;
+                startBtn.style.display = 'none';
+                startLevel();
+            }
+        });
+
+        patternGrid.addEventListener('click', () => {
+            if (!canSelect) return;
+            // If all numbers placed, check result
+            if (userPattern.filter(x => x !== null && x !== undefined).length === level) {
+                canSelect = false;
+                checkResult();
+            }
+        });
+
+        // Initial render
+        updateGameInfo();
+        renderGrid(Array(gridSize * gridSize).fill(null));
+        startBtn.style.display = 'inline-block';
+    </script>
+</body>
+</html> 

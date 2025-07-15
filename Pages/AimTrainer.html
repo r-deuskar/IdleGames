@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aim Trainer</title>
+    <style>
+        /* Basic Reset and Body Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: radial-gradient(ellipse at center, #0a0a0a 0%, #000000 100%);
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #00ffff;
+            overflow-x: hidden;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            line-height: 1.6;
+            cursor: crosshair;
+            padding-top: 70px !important;
+        }
+
+        /* Background Gradients */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(0, 255, 0, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .navbar {
+            width: 100vw;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,255,255,0.25);
+            box-shadow: 0 2px 20px rgba(0,255,255,0.08);
+            padding: 1rem 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+        }
+        .nav-home {
+            color: #00ffff;
+            font-size: 1.2rem;
+            font-family: inherit;
+            text-decoration: none;
+            margin-left: 2.5rem;
+            padding: 0.5em 1.5em;
+            border-radius: 30px;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff44;
+            font-weight: bold;
+            letter-spacing: 1px;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        }
+        .nav-home:hover {
+            background: linear-gradient(45deg, #ff00ff, #00ff80);
+            color: #fff;
+            box-shadow: 0 0 20px #ff00ff, 0 0 30px #00ff80;
+        }
+        @media (max-width: 600px) {
+            .navbar { padding: 0.5rem 0; }
+            .nav-home { margin-left: 1rem; font-size: 1rem; padding: 0.4em 1em; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: 300;
+            color: #ffffff;
+            margin-bottom: 2rem;
+            text-align: center;
+            text-shadow:
+                0 0 10px #00ffff,
+                0 0 20px #00ffff,
+                0 0 40px #00ffff;
+        }
+
+        .game-container {
+            text-align: center;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .stats-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+
+        .stat-item {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(0, 255, 255, 0.8);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        canvas {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            box-shadow:
+                0 0 20px rgba(0, 255, 255, 0.3),
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
+            cursor: crosshair;
+            transition: border-color 0.3s ease;
+        }
+
+        canvas:hover {
+            border-color: #00ffff;
+            box-shadow:
+                0 0 30px rgba(0, 255, 255, 0.5),
+                inset 0 0 30px rgba(0, 255, 255, 0.1);
+        }
+
+        .controls {
+            margin-top: 2rem;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+            color: #00ffff;
+            line-height: 1.6;
+        }
+
+        .controls div {
+            margin: 8px 0;
+        }
+
+        .controls strong {
+            color: #00ff80;
+            text-shadow: 0 0 5px #00ff80;
+        }
+
+        .game-over {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(30px);
+            border-radius: 20px;
+            padding: 40px;
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            box-shadow:
+                0 0 40px rgba(0, 255, 255, 0.3),
+                inset 0 0 40px rgba(0, 255, 255, 0.1);
+            text-align: center;
+            display: none;
+            z-index: 1000;
+            min-width: 400px;
+        }
+
+        .game-over h2 {
+            color: #ffffff;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-shadow:
+                0 0 10px #00ffff,
+                0 0 20px #00ffff;
+        }
+
+        .final-score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #00ff80;
+            margin: 1rem 0;
+            text-shadow: 0 0 15px #00ff80, 0 0 30px #00ff80;
+        }
+
+        .game-over-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .game-over-stat {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+        }
+
+        .game-over-stat-label {
+            font-size: 0.9rem;
+            color: rgba(0, 255, 255, 0.8);
+            margin-bottom: 0.5rem;
+        }
+
+        .game-over-stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            color: #000000;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 1rem auto;
+            display: block;
+            box-shadow:
+                0 0 20px rgba(0, 255, 255, 0.5),
+                inset 0 0 20px rgba(255, 255, 255, 0.2);
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 0 30px rgba(0, 255, 255, 0.8),
+                0 5px 20px rgba(0, 0, 0, 0.3),
+                inset 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .start-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00ffff;
+            font-size: 1.5rem;
+            text-shadow: 0 0 15px #00ffff;
+            animation: pulse 2s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ffff;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            display: none;
+            z-index: 1000;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .stats-board {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            canvas {
+                width: 100%;
+                height: 400px;
+            }
+
+            .game-over {
+                min-width: 300px;
+                padding: 30px;
+            }
+
+            .game-over-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .stats-board {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-home">Home</a>
+    </nav>
+    <div class="container">
+        <h1 class="title">AIM TRAINER</h1>
+        
+        <div class="game-container">
+            <div class="stats-board">
+                <div class="stat-item">
+                    <div class="stat-label">SCORE</div>
+                    <div class="stat-value" id="score">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">TIME</div>
+                    <div class="stat-value" id="timer">30</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">ACCURACY</div>
+                    <div class="stat-value" id="accuracy">0%</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">TARGETS</div>
+                    <div class="stat-value" id="targets">0</div>
+                </div>
+            </div>
+            
+            <div style="position: relative;">
+                <canvas id="gameCanvas" width="800" height="600"></canvas>
+                <div class="start-message" id="startMessage">Click to Start</div>
+            </div>
+            
+            <div class="controls">
+                <div><strong>Instructions:</strong> Click the glowing targets to score points</div>
+                <div><strong>Game Duration:</strong> 30 seconds of intense neon action</div>
+                <div><strong>Reset:</strong> Press R to restart at any time</div>
+                <div><strong>Debug:</strong> Press D to toggle debug info</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-over" id="gameOver">
+        <h2>GAME OVER</h2>
+        <div class="final-score" id="finalScore">0</div>
+        <div class="game-over-stats" id="gameOverStats"></div>
+        <input
+            type="text"
+            id="userNameInput"
+            class="name-input"
+            placeholder="Enter your name to save score..."
+        />
+        <div class="button-container">
+            <button id="saveScoreBtn" class="btn">Save Score</button>
+            <button id="playAgainBtn" class="btn secondary">Play Again</button>
+        </div>
+    </div>
+
+    <div class="debug-info" id="debugInfo"></div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
+        const timerEl = document.getElementById('timer');
+        const accuracyEl = document.getElementById('accuracy');
+        const targetsEl = document.getElementById('targets');
+        const gameOverEl = document.getElementById('gameOver');
+        const finalScoreEl = document.getElementById('finalScore');
+        const gameOverStatsEl = document.getElementById('gameOverStats');
+        const startMessageEl = document.getElementById('startMessage');
+        const debugInfoEl = document.getElementById('debugInfo');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        const saveScoreBtn = document.getElementById('saveScoreBtn');
+        const userNameInput = document.getElementById('userNameInput');
+
+        // Game state
+        let gameActive = false;
+        let score = 0;
+        let shots = 0;
+        let hits = 0;
+        let timeLeft = 30;
+        let targets = [];
+        let hitMarkers = [];
+        let gameTimer;
+        let spawnTimer;
+        let debugMode = false;
+
+        // Get actual canvas dimensions accounting for CSS scaling
+        function getCanvasCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            return {
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
+            };
+        }
+
+        // Hit marker class
+        class HitMarker {
+            constructor(x, y, points) {
+                this.x = x;
+                this.y = y;
+                this.points = points;
+                this.life = 800; // 0.8 seconds
+                this.maxLife = 800;
+                this.scale = 0.5;
+                this.maxScale = 1.5;
+            }
+
+            update(deltaTime) {
+                this.life -= deltaTime;
+                // Pop effect - scale up quickly then fade
+                const progress = 1 - (this.life / this.maxLife);
+                if (progress < 0.3) {
+                    this.scale = 0.5 + (progress / 0.3) * this.maxScale;
+                } else {
+                    this.scale = this.maxScale * (1 - ((progress - 0.3) / 0.7));
+                }
+            }
+
+            draw() {
+                const alpha = this.life / this.maxLife;
+                
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.scale(this.scale, this.scale);
+                
+                // Draw hit burst effect
+                ctx.strokeStyle = `rgba(0, 255, 255, ${alpha})`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i * Math.PI * 2) / 8;
+                    const x1 = Math.cos(angle) * 10;
+                    const y1 = Math.sin(angle) * 10;
+                    const x2 = Math.cos(angle) * 20;
+                    const y2 = Math.sin(angle) * 20;
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                }
+                ctx.stroke();
+                
+                // Draw points
+                ctx.fillStyle = `rgba(0, 255, 255, ${alpha})`;
+                ctx.font = '16px Monaco';
+                ctx.textAlign = 'center';
+                ctx.fillText(`+${this.points}`, 0, -25);
+                
+                ctx.restore();
+            }
+        }
+
+        // Target class
+        class Target {
+            constructor() {
+                this.radius = Math.random() * 25 + 20; // 20-45px radius
+                this.x = Math.random() * (canvas.width - this.radius * 2) + this.radius;
+                this.y = Math.random() * (canvas.height - this.radius * 2) + this.radius;
+                this.dx = (Math.random() - 0.5) * 3; // -1.5 to 1.5 speed
+                this.dy = (Math.random() - 0.5) * 3;
+                this.life = 4000; // 4 seconds
+                this.maxLife = 4000;
+                this.points = Math.max(1, Math.floor(80 / this.radius)); // Smaller targets = more points
+                this.pulsePhase = Math.random() * Math.PI * 2;
+            }
+
+            update(deltaTime) {
+                this.x += this.dx;
+                this.y += this.dy;
+                this.pulsePhase += deltaTime * 0.005;
+
+                // Bounce off walls
+                if (this.x - this.radius <= 0 || this.x + this.radius >= canvas.width) {
+                    this.dx = -this.dx;
+                    this.x = Math.max(this.radius, Math.min(canvas.width - this.radius, this.x));
+                }
+                if (this.y - this.radius <= 0 || this.y + this.radius >= canvas.height) {
+                    this.dy = -this.dy;
+                    this.y = Math.max(this.radius, Math.min(canvas.height - this.radius, this.y));
+                }
+
+                this.life -= deltaTime;
+            }
+
+            draw() {
+                const alpha = Math.min(1, this.life / this.maxLife);
+                const pulse = Math.sin(this.pulsePhase) * 0.2 + 0.8;
+                
+                // Draw target rings with pulsing effect
+                ctx.strokeStyle = `rgba(0, 255, 255, ${alpha * pulse})`;
+                ctx.lineWidth = 3;
+                
+                // Outer ring
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // Middle ring
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius * 0.7, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // Inner ring
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius * 0.4, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // Center dot
+                ctx.fillStyle = `rgba(0, 255, 255, ${alpha * pulse})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius * 0.15, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Draw points value
+                ctx.fillStyle = `rgba(0, 255, 255, ${alpha * 0.8})`;
+                ctx.font = '14px Monaco';
+                ctx.textAlign = 'center';
+                ctx.fillText(this.points.toString(), this.x, this.y - this.radius - 15);
+
+                // Debug: Draw hit area
+                if (debugMode) {
+                    ctx.strokeStyle = `rgba(255, 0, 0, 0.3)`;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+
+            isHit(mouseX, mouseY) {
+                const distance = Math.sqrt((mouseX - this.x) ** 2 + (mouseY - this.y) ** 2);
+                return distance <= this.radius;
+            }
+        }
+
+        // Input handling
+        document.addEventListener('keydown', (e) => {
+            // Only allow R and D if not in Game Over screen
+            if (gameOverEl.style.display === 'block') return;
+            if (e.key.toLowerCase() === 'r') {
+                startGame();
+            }
+            if (e.key.toLowerCase() === 'd') {
+                debugMode = !debugMode;
+                debugInfoEl.style.display = debugMode ? 'block' : 'none';
+            }
+        });
+
+        // Mouse click handling
+        canvas.addEventListener('click', (e) => {
+            if (!gameActive && timeLeft === 30) {
+                startGame();
+                return;
+            }
+            
+            if (!gameActive) return;
+
+            const coords = getCanvasCoordinates(e);
+            const mouseX = coords.x;
+            const mouseY = coords.y;
+
+            shots++;
+            let hitTarget = false;
+
+            // Check if any target was hit
+            for (let i = targets.length - 1; i >= 0; i--) {
+                if (targets[i].isHit(mouseX, mouseY)) {
+                    const target = targets[i];
+                    score += target.points;
+                    hits++;
+                    hitTarget = true;
+                    
+                    // Create hit marker at target position
+                    hitMarkers.push(new HitMarker(target.x, target.y, target.points));
+                    
+                    // Remove target immediately
+                    targets.splice(i, 1);
+                    break;
+                }
+            }
+
+            // Debug info
+            if (debugMode) {
+                const debugText = `
+                    Click: (${mouseX.toFixed(1)}, ${mouseY.toFixed(1)})
+                    Targets: ${targets.length}
+                    Hit: ${hitTarget ? 'YES' : 'NO'}
+                    Shots: ${shots}
+                    Hits: ${hits}
+                `;
+                debugInfoEl.textContent = debugText;
+            }
+
+            updateStats();
+        });
+
+        // Mouse move for debug
+        canvas.addEventListener('mousemove', (e) => {
+            if (!debugMode) return;
+            
+            const coords = getCanvasCoordinates(e);
+            const mouseX = coords.x;
+            const mouseY = coords.y;
+            
+            let nearestTarget = null;
+            let nearestDistance = Infinity;
+            
+            targets.forEach((target, index) => {
+                const distance = Math.sqrt((mouseX - target.x) ** 2 + (mouseY - target.y) ** 2);
+                if (distance < nearestDistance) {
+                    nearestDistance = distance;
+                    nearestTarget = { index, distance, target };
+                }
+            });
+            
+            const debugText = `
+                Mouse: (${mouseX.toFixed(1)}, ${mouseY.toFixed(1)})
+                Targets: ${targets.length}
+                Nearest: ${nearestTarget ? `#${nearestTarget.index} dist=${nearestDistance.toFixed(1)} radius=${nearestTarget.target.radius.toFixed(1)}` : 'None'}
+                ${nearestTarget && nearestDistance <= nearestTarget.target.radius ? 'WOULD HIT' : 'NO HIT'}
+            `;
+            debugInfoEl.textContent = debugText;
+        });
+
+        function spawnTarget() {
+            if (gameActive && targets.length < 6) {
+                targets.push(new Target());
+            }
+        }
+
+        function updateStats() {
+            scoreEl.textContent = score;
+            timerEl.textContent = timeLeft;
+            accuracyEl.textContent = shots > 0 ? Math.round((hits / shots) * 100) + '%' : '0%';
+            targetsEl.textContent = targets.length;
+        }
+
+        function draw() {
+            // Clear canvas with dark background
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw subtle grid pattern
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.05)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < canvas.height; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+
+            // Draw targets
+            targets.forEach(target => target.draw());
+            
+            // Draw hit markers
+            hitMarkers.forEach(marker => marker.draw());
+        }
+
+        function gameLoop() {
+            const deltaTime = 16;
+
+            if (gameActive) {
+                startMessageEl.style.display = 'none';
+                
+                // Update targets
+                for (let i = targets.length - 1; i >= 0; i--) {
+                    targets[i].update(deltaTime);
+                    if (targets[i].life <= 0) {
+                        targets.splice(i, 1);
+                    }
+                }
+                
+                // Update hit markers
+                for (let i = hitMarkers.length - 1; i >= 0; i--) {
+                    hitMarkers[i].update(deltaTime);
+                    if (hitMarkers[i].life <= 0) {
+                        hitMarkers.splice(i, 1);
+                    }
+                }
+            } else {
+                startMessageEl.style.display = 'block';
+            }
+
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startGame() {
+            gameActive = true;
+            score = 0;
+            shots = 0;
+            hits = 0;
+            timeLeft = 30;
+            targets = [];
+            hitMarkers = [];
+            gameOverEl.style.display = 'none';
+
+            updateStats();
+            clearInterval(gameTimer);
+            clearInterval(spawnTimer);
+            // Start game timer
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                updateStats();
+                
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+
+            // Start target spawning
+            spawnTimer = setInterval(spawnTarget, 1000);
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(gameTimer);
+            clearInterval(spawnTimer);
+            
+            const accuracy = shots > 0 ? Math.round((hits / shots) * 100) : 0;
+            
+            finalScoreEl.textContent = score;
+            gameOverStatsEl.innerHTML = `
+                <div class="game-over-stat">
+                    <div class="game-over-stat-label">TARGETS HIT</div>
+                    <div class="game-over-stat-value">${hits}</div>
+                </div>
+                <div class="game-over-stat">
+                    <div class="game-over-stat-label">TOTAL SHOTS</div>
+                    <div class="game-over-stat-value">${shots}</div>
+                </div>
+                <div class="game-over-stat">
+                    <div class="game-over-stat-label">ACCURACY</div>
+                    <div class="game-over-stat-value">${accuracy}%</div>
+                </div>
+                <div class="game-over-stat">
+                    <div class="game-over-stat-label">FINAL SCORE</div>
+                    <div class="game-over-stat-value">${score}</div>
+                </div>
+            `;
+            
+            gameOverEl.style.display = 'block';
+        }
+
+
+        function saveScore() {
+            if(userNameInput.value.trim() === '') {
+                alert('Please enter a name to save your score');
+                return;
+            }
+            console.log(userNameInput.value, score);
+            userNameInput.classList.add('hidden');
+            saveScoreBtn.classList.add('hidden');
+            playAgainBtn.textContent = 'Play Again';
+        }
+        saveScoreBtn.addEventListener('click', saveScore);
+        playAgainBtn.addEventListener('click', startGame);
+
+        // Start the game loop
+        gameLoop();
+    </script>
+</body>
+</html>

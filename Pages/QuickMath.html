@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arithmetic Flash Challenge</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="../index.html" class="nav-home">Home</a>
+    </nav>
+  <style>
+  /* Basic Reset and Body Styles */
+  body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(ellipse at center, #0a0a0a 0%, #000000 100%);
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh; /* Use min-height for better content handling */
+      color: #00ffff;
+      overflow: hidden; /* Prevent scrollbars from background effects */
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      padding-top: 70px !important;
+  }
+
+  /* Background Gradients (Similar to previous theme) */
+  body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+          radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+          radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+          radial-gradient(circle at 40% 20%, rgba(0, 255, 0, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+  }
+
+  /* Game Container */
+  .game-container {
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow:
+          0 0 40px rgba(0, 255, 255, 0.3),
+          inset 0 0 40px rgba(0, 255, 255, 0.1);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      text-align: center;
+      max-width: 600px; /* Adjusted max-width for math game */
+      width: 90%;
+      margin-bottom: 20px; /* Space for the spacebar indicator if needed */
+  }
+
+  h1 {
+      margin: 0 0 20px 0;
+      font-size: 2.5em;
+      text-shadow:
+          0 0 10px #00ffff,
+          0 0 20px #00ffff,
+          0 0 40px #00ffff;
+      color: #ffffff;
+  }
+
+  .instructions {
+      margin-bottom: 20px;
+      font-size: 1.1em;
+      opacity: 0.9;
+  }
+
+  /* Score Board */
+  .score-board {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap; /* Allow wrapping on smaller screens */
+      gap: 10px; /* Space between items */
+      margin: 20px 0;
+      font-size: 1.2em; /* Slightly smaller for more items */
+  }
+
+  .score-item {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px 15px; /* Adjusted padding */
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(0, 255, 255, 0.3);
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+      min-width: 80px; /* Ensure items don't get too small */
+  }
+
+  /* Game Area and Screens */
+  .game-area {
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 10px;
+      padding: 30px;
+      margin: 20px 0;
+      border: 2px solid rgba(0, 255, 255, 0.5);
+      box-shadow:
+          0 0 20px rgba(0, 255, 255, 0.3),
+          inset 0 0 20px rgba(0, 255, 255, 0.1);
+      min-height: 200px; /* Ensure consistent height */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+  }
+
+  .game-screen {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+  }
+
+  /* Problem Display */
+  .problem-display {
+      font-size: 3em;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #00ff80; /* Greenish glow */
+      text-shadow: 0 0 15px #00ff80, 0 0 30px #00ff80;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+  }
+
+  .problem-display span {
+      display: inline-block;
+      min-width: 40px; /* Give numbers space */
+  }
+
+  /* Input Field */
+  .answer-input {
+      width: 80%;
+      max-width: 250px;
+      padding: 12px 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 2px solid rgba(0, 255, 255, 0.5);
+      background-color: rgba(0, 0, 0, 0.7);
+      color: #00ffff;
+      font-size: 1.8em; /* Larger for better visibility */
+      text-align: center;
+      outline: none;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .answer-input::placeholder {
+      color: rgba(0, 255, 255, 0.5);
+  }
+
+  .answer-input:focus {
+      border-color: #00ffff;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+  }
+
+  /* Buttons (Similar to previous theme) */
+  .action-btn {
+      padding: 12px 25px;
+      font-size: 1.2em;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      margin: 10px;
+      transition: all 0.3s ease;
+      text-shadow: none;
+      border: none;
+      outline: none;
+  }
+
+  .primary-btn {
+      background: linear-gradient(45deg, #00ffff, #0080ff);
+      color: #000000;
+      box-shadow:
+          0 0 20px rgba(0, 255, 255, 0.5),
+          inset 0 0 20px rgba(255, 255, 255, 0.2);
+  }
+
+  .primary-btn:hover {
+      transform: translateY(-2px);
+      box-shadow:
+          0 0 30px rgba(0, 255, 255, 0.8),
+          0 5px 20px rgba(0, 0, 0, 0.3),
+          inset 0 0 30px rgba(255, 255, 255, 0.3);
+  }
+
+  .secondary-btn {
+      background: rgba(0, 255, 255, 0.2);
+      color: #00ffff;
+      border: 1px solid rgba(0, 255, 255, 0.5);
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+  }
+
+  .secondary-btn:hover {
+      background: rgba(0, 255, 255, 0.3);
+      transform: translateY(-1px);
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+  }
+
+  /* Feedback Message */
+  .feedback {
+      height: 30px;
+      font-size: 1.2em;
+      font-weight: bold;
+      margin: 10px 0;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .correct {
+      color: #00ff00; /* Green */
+      text-shadow: 0 0 10px #00ff00;
+  }
+  .incorrect {
+      color: #ff0040; /* Red */
+      text-shadow: 0 0 10px #ff0040;
+  }
+
+  /* Game Over Screen Specifics */
+  .highlight-score {
+      color: #00ff00;
+      font-weight: bold;
+      text-shadow: 0 0 10px #00ff00;
+  }
+
+  .highlight-misses {
+      color: #ff0040;
+      font-weight: bold;
+      text-shadow: 0 0 10px #ff0040;
+  }
+
+  /* Controls Hint */
+  .controls {
+      margin-top: 20px;
+      font-size: 1.1em;
+      opacity: 0.8;
+  }
+
+  /* Utility Class */
+  .hidden {
+      display: none !important;
+  }
+
+  /* Icons */
+  .large-icon {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 20px;
+      color: #00ffff;
+      text-shadow: 0 0 15px #00ffff;
+  }
+
+  /* Basic styling for mobile responsiveness */
+  @media (max-width: 480px) {
+      .game-container {
+          padding: 20px;
+      }
+      h1 {
+          font-size: 1.8em;
+      }
+      .score-board {
+          flex-direction: column;
+          gap: 8px;
+      }
+      .score-item {
+          width: 100%;
+          padding: 8px 10px;
+      }
+      .problem-display {
+          font-size: 2.2em;
+          gap: 10px;
+      }
+      .answer-input {
+          font-size: 1.4em;
+          padding: 10px 15px;
+      }
+      .action-btn {
+          font-size: 1em;
+          padding: 10px 20px;
+      }
+      .large-icon {
+          width: 40px;
+          height: 40px;
+      }
+  }
+  .navbar {
+      width: 100vw;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,255,255,0.25);
+      box-shadow: 0 2px 20px rgba(0,255,255,0.08);
+      padding: 1rem 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+  }
+  .nav-home {
+      color: #00ffff;
+      font-size: 1.2rem;
+      font-family: inherit;
+      text-decoration: none;
+      margin-left: 2.5rem;
+      padding: 0.5em 1.5em;
+      border-radius: 30px;
+      background: linear-gradient(45deg, #00ffff, #0080ff);
+      box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff44;
+      font-weight: bold;
+      letter-spacing: 1px;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  }
+  .nav-home:hover {
+      background: linear-gradient(45deg, #ff00ff, #00ff80);
+      color: #fff;
+      box-shadow: 0 0 20px #ff00ff, 0 0 30px #00ff80;
+  }
+  @media (max-width: 600px) {
+      .navbar { padding: 0.5rem 0; }
+      .nav-home { margin-left: 1rem; font-size: 1rem; padding: 0.4em 1em; }
+  }
+  </style>
+    <div class="game-container">
+        <h1>🔢 Arithmetic Flash Challenge</h1>
+        <div class="instructions">
+            Solve as many math problems as you can in 30 seconds!
+        </div>
+
+        <div class="score-board">
+            <div class="score-item">
+                Time: <span id="timeLeft">30s</span>
+            </div>
+            <div class="score-item">
+                Score: <span id="score">0</span>
+            </div>
+            <div class="score-item">
+                Streak: <span id="streak">0</span>
+            </div>
+            <div class="score-item">
+                Misses: <span id="misses">0</span>
+            </div>
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <div id="startScreen" class="game-screen" >
+                <i data-lucide="play-circle" class="large-icon"></i>
+                <p>Press 'Enter' to begin!</p>
+            </div>
+
+            <div id="gameActiveScreen" class="game-screen hidden">
+                <div class="problem-display">
+                    <span id="num1"></span>
+                    <span id="operator"></span>
+                    <span id="num2"></span>
+                    <span>= ?</span>
+                </div>
+                <input
+                    type="number"
+                    id="userInput"
+                    class="answer-input"
+                    placeholder="Your Answer"
+                    autocomplete="off"
+                />
+                <button id="submitBtn" class="action-btn primary-btn">Submit</button>
+            </div>
+
+            <div id="gameOverScreen" class="game-screen hidden">
+                <i data-lucide="award" class="large-icon"></i>
+                <h2>Game Over!</h2>
+                <p>Final Score: <span id="finalScore" class="highlight-score">0</span></p>
+                <p>Total Misses: <span id="finalMisses" class="highlight-misses">0</span></p>
+                <p id="gameOverMessage"></p>
+                <input id="userName" class="answer-input" placeholder="Your Name" autocomplete="off" />
+                <button id="submitScoreBtn" class="action-btn primary-btn">Submit Score</button>
+                <button id="playAgainBtn" class="action-btn primary-btn"> Skip and Play Again </button>
+                <button id="resetGameBtn" class="action-btn secondary-btn">Reset</button>
+              
+            </div>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+
+        <div class="controls">
+            Press ENTER to submit your answer • Solve for bonus points!
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Ensure Lucide icons are rendered after the DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+      
+      document.addEventListener('DOMContentLoaded', () => {
+    // --- DOM Elements ---
+    const timeLeftDisplay = document.getElementById('timeLeft');
+    const scoreDisplay = document.getElementById('score');
+    const streakDisplay = document.getElementById('streak');
+    const missesDisplay = document.getElementById('misses');
+
+    const startScreen = document.getElementById('startScreen');
+    const gameActiveScreen = document.getElementById('gameActiveScreen');
+    const gameOverScreen = document.getElementById('gameOverScreen');
+
+    const num1Display = document.getElementById('num1');
+    const operatorDisplay = document.getElementById('operator');
+    const num2Display = document.getElementById('num2');
+    const userInput = document.getElementById('userInput');
+    const submitBtn = document.getElementById('submitBtn');
+
+    const feedbackDisplay = document.getElementById('feedback');
+    const finalScoreDisplay = document.getElementById('finalScore');
+    const finalMissesDisplay = document.getElementById('finalMisses');
+    const gameOverMessageDisplay = document.getElementById('gameOverMessage');
+
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const resetGameBtn = document.getElementById('resetGameBtn');
+    const submitScoreBtn = document.getElementById('submitScoreBtn');
+    const userNameInput = document.getElementById('userName');
+     
+
+    // --- Game State ---
+    let gameState = {
+        isPlaying: false,
+        score: 0,
+        streak: 0,
+        misses: 0,
+        maxMisses: 5,
+        timeLeft: 30,
+        currentProblem: {
+            num1: 0,
+            num2: 0,
+            operator: '',
+            answer: 0
+        },
+        timerInterval: null
+    };
+
+    const maxNumber = 12; // Max number for problems (e.g., up to 12x12, 12+12 etc.)
+    const operations = ['+', '-', '*', '/'];
+
+    // --- Helper Functions ---
+    function getRandomNumber(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function generateProblem() {
+        let num1, num2, operator, answer;
+
+        // Ensure division problems have integer answers
+        do {
+            num1 = getRandomNumber(1, maxNumber);
+            num2 = getRandomNumber(1, maxNumber);
+            operator = operations[getRandomNumber(0, operations.length - 1)];
+
+            switch (operator) {
+                case '+':
+                    answer = num1 + num2;
+                    break;
+                case '-':
+                    // Ensure result is not negative for subtraction
+                    if (num1 < num2) {
+                        [num1, num2] = [num2, num1]; // Swap to ensure num1 >= num2
+                    }
+                    answer = num1 - num2;
+                    break;
+                case '*':
+                    answer = num1 * num2;
+                    break;
+                case '/':
+                    // Ensure num1 is a multiple of num2 for integer division
+                    if (num2 === 0) continue; // Avoid division by zero
+                    num1 = num1 * num2; // Make num1 a multiple of num2
+                    answer = num1 / num2;
+                    break;
+            }
+        } while (operator === '/' && (num1 % num2 !== 0)); // Re-generate if division results in remainder
+
+        gameState.currentProblem = { num1, num2, operator, answer };
+        num1Display.textContent = num1;
+        operatorDisplay.textContent = operator;
+        num2Display.textContent = num2;
+        userInput.value = ''; // Clear previous input
+        userInput.focus(); // Focus input for quick typing
+    }
+
+    function updateDisplay() {
+        timeLeftDisplay.textContent = `${gameState.timeLeft}s`;
+        scoreDisplay.textContent = gameState.score;
+        streakDisplay.textContent = gameState.streak;
+        missesDisplay.textContent = gameState.misses;
+    }
+
+    function showFeedback(message, type) {
+        feedbackDisplay.textContent = message;
+        feedbackDisplay.className = `feedback ${type}`; // Apply class for styling
+        setTimeout(() => {
+            feedbackDisplay.textContent = '';
+            feedbackDisplay.className = 'feedback'; // Reset class
+        }, 1200); // Clear feedback after 1.2 seconds
+    }
+
+    // --- Game Logic ---
+    function startGame() {
+        gameState.isPlaying = true;
+        gameState.score = 0;
+        gameState.streak = 0;
+        gameState.misses = 0;
+        gameState.timeLeft = 30;
+
+        // Show active game screen, hide others
+        startScreen.classList.add('hidden');
+        gameOverScreen.classList.add('hidden');
+        gameActiveScreen.classList.remove('hidden');
+
+        updateDisplay();
+        generateProblem();
+        startTimer();
+    }
+
+    function startTimer() {
+        clearInterval(gameState.timerInterval); // Clear any existing timer
+        gameState.timerInterval = setInterval(() => {
+            gameState.timeLeft--;
+            timeLeftDisplay.textContent = `${gameState.timeLeft}s`;
+
+            if (gameState.timeLeft <= 0) {
+                clearInterval(gameState.timerInterval);
+                endGame("Time's up!");
+            }
+        }, 1000);
+    }
+
+    function checkAnswer() {
+        if (!gameState.isPlaying) return;
+
+        const playerAnswer = parseInt(userInput.value, 10); // Parse input to integer
+
+        // Basic validation: ensure input is a number
+        if (isNaN(playerAnswer)) {
+            showFeedback('Please enter a number!', 'incorrect');
+            return;
+        }
+
+        if (playerAnswer === gameState.currentProblem.answer) {
+            gameState.score += 10 + (gameState.streak); // Score + streak bonus
+            gameState.streak++;
+            showFeedback('Correct!', 'correct');
+            generateProblem(); // Move to next problem
+        } else {
+            gameState.streak = 0; // Break streak on incorrect answer
+            gameState.misses++;
+            gameState.score -= 5; // Score + streak bonus
+            showFeedback('Incorrect!', 'incorrect');
+
+            if (gameState.misses >= gameState.maxMisses) {
+                endGame(`Too many misses!`);
+                return;
+            }
+            generateProblem();
+        }
+        updateDisplay();
+    }
+
+    function endGame(message = "Game Over!") {
+        gameState.isPlaying = false;
+        clearInterval(gameState.timerInterval); // Stop the timer
+
+        // Show game over screen, hide others
+        gameActiveScreen.classList.add('hidden');
+        startScreen.classList.add('hidden'); // Ensure start screen is hidden
+        gameOverScreen.classList.remove('hidden');
+
+        finalScoreDisplay.textContent = gameState.score;
+        finalMissesDisplay.textContent = gameState.misses;
+        gameOverMessageDisplay.textContent = message;
+
+        // Determine a friendly message
+        if (gameState.score < 50) {
+            gameOverMessageDisplay.textContent += " Keep practicing!";
+        } else if (gameState.score < 150) {
+            gameOverMessageDisplay.textContent += " Good effort!";
+        } else {
+            gameOverMessageDisplay.textContent += " Excellent work!";
+        }
+      
+    }
+
+    function resetGame() {
+        gameState.isPlaying = false;
+        gameState.score = 0;
+        gameState.streak = 0;
+        gameState.misses = 0;
+        gameState.timeLeft = 30;
+        clearInterval(gameState.timerInterval);
+
+        // Show start screen, hide others
+        gameOverScreen.classList.add('hidden');
+        gameActiveScreen.classList.add('hidden');
+        startScreen.classList.remove('hidden');
+
+        updateDisplay();
+        feedbackDisplay.textContent = ''; // Clear any lingering feedback
+        userInput.value = ''; // Clear input
+    }
+        
+    function submitScore(){
+      let username = userNameInput.value;
+      console.log(gameState.score, username);
+    }
+
+    // --- Event Listeners ---
+    // Start game via Enter key on start screen OR submit button on active screen
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            if (!gameState.isPlaying && startScreen.classList.contains('hidden') === false) {
+                // If on start screen, press Enter to start
+                startGame();
+            } else if (gameState.isPlaying && gameActiveScreen.classList.contains('hidden') === false) {
+                // If in active game, press Enter to check answer
+                e.preventDefault(); // Prevent default Enter key behavior (e.g., form submission)
+                checkAnswer();
+            }
+        }
+    });
+
+    // Start game button
+    document.querySelector('#startScreen').addEventListener('click', startGame);
+
+    // Submit button in active game
+    submitBtn.addEventListener('click', checkAnswer);
+
+    // Play Again button on game over screen
+    playAgainBtn.addEventListener('click', startGame);
+
+    // Reset button on game over screen
+    resetGameBtn.addEventListener('click', resetGame);
+    
+    // Submit Score and Name to Google Sheets    
+    submitScoreBtn.addEventListener('click', submitScore);
+        
+
+    // --- Initial Setup ---
+    updateDisplay(); // Set initial display values
+});
+    </script>
+</body>
+</html>

@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>WordPlay Daily</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Daily Word Game</title>
+    <style>
+        /* Basic Reset and Body Styles */
+body {
+    margin: 0;
+    padding: 0;
+    background: radial-gradient(ellipse at center, #0a0a0a 0%, #000000 100%);
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    color: #00ffff;
+    overflow: hidden;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Background Gradients */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(0, 255, 0, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* Game Container */
+.game-container {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow:
+        0 0 40px rgba(0, 255, 255, 0.3),
+        inset 0 0 40px rgba(0, 255, 255, 0.1);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    text-align: center;
+    max-width: 700px;
+    width: 90%;
+    margin-bottom: 20px;
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+
+h1 {
+    margin: 0 0 20px 0;
+    font-size: 2.5em;
+    text-shadow:
+        0 0 10px #00ffff,
+        0 0 20px #00ffff,
+        0 0 40px #00ffff;
+    color: #ffffff;
+}
+
+.instructions {
+    margin-bottom: 20px;
+    font-size: 1.1em;
+    opacity: 0.9;
+}
+
+/* Score Board */
+.score-board {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 20px 0;
+    font-size: 1.2em;
+}
+
+.score-item {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px 15px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+    min-width: 80px;
+}
+
+/* Game Area and Screens */
+.game-area {
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    padding: 30px;
+    margin: 20px 0;
+    border: 2px solid rgba(0, 255, 255, 0.5);
+    box-shadow:
+        0 0 20px rgba(0, 255, 255, 0.3),
+        inset 0 0 20px rgba(0, 255, 255, 0.1);
+    min-height: 350px; /* Increased height for hints */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    position: relative;
+}
+
+.game-screen {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Word Blanks */
+.word-blanks {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    font-size: 3em;
+    font-weight: bold;
+    color: #00ff80;
+    text-shadow: 0 0 15px #00ff80, 0 0 30px #00ff80;
+    letter-spacing: 5px;
+}
+
+/* Hints Section */
+.hints-section {
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 30px;
+    text-align: left;
+    transition: all 0.3s ease-in-out;
+    opacity: 1;
+}
+
+.hint-label {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #00ffff;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    text-shadow: 0 0 5px #00ffff;
+}
+
+.hints {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    min-height: 24px; /* Ensure consistent height for placeholders */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.hints span:not(.hint-placeholder) {
+    display: inline-block;
+    background: rgba(0, 255, 255, 0.2);
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 0.9em;
+    border: 1px solid rgba(0, 255, 255, 0.4);
+}
+
+.hints .hint-placeholder {
+    color: rgba(0, 255, 255, 0.6);
+    font-style: italic;
+    font-size: 0.9em;
+}
+
+.sentence-hint {
+    font-style: italic;
+    font-size: 0.95em;
+    line-height: 1.4;
+}
+
+/* Input Field */
+.answer-input {
+    width: 80%;
+    max-width: 300px;
+    padding: 12px 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    border: 2px solid rgba(0, 255, 255, 0.5);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: #00ffff;
+    font-size: 1.8em;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    text-transform: uppercase;
+}
+
+.answer-input::placeholder {
+    color: rgba(0, 255, 255, 0.5);
+}
+
+.answer-input:focus {
+    border-color: #00ffff;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+}
+
+/* Buttons */
+.action-btn {
+    padding: 12px 25px;
+    font-size: 1.2em;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    margin: 10px;
+    transition: all 0.3s ease;
+    text-shadow: none;
+    border: none;
+    outline: none;
+}
+
+.primary-btn {
+    background: linear-gradient(45deg, #00ffff, #0080ff);
+    color: #000000;
+    box-shadow:
+        0 0 20px rgba(0, 255, 255, 0.5),
+        inset 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 0 30px rgba(0, 255, 255, 0.8),
+        0 5px 20px rgba(0, 0, 0, 0.3),
+        inset 0 0 30px rgba(255, 255, 255, 0.3);
+}
+
+.secondary-btn {
+    background: rgba(0, 255, 255, 0.2);
+    color: #00ffff;
+    border: 1px solid rgba(0, 255, 255, 0.5);
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+.secondary-btn:hover {
+    background: rgba(0, 255, 255, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+/* Feedback Message */
+.feedback {
+    height: 30px;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin: 10px 0;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.correct {
+    color: #00ff00;
+    text-shadow: 0 0 10px #00ff00;
+}
+.incorrect {
+    color: #ff0040;
+    text-shadow: 0 0 10px #ff0040;
+}
+.warning {
+    color: #ffcc00;
+    text-shadow: 0 0 10px #ffcc00;
+}
+
+/* Game Over Screen Specifics */
+.highlight-score {
+    color: #00ff00;
+    font-weight: bold;
+    text-shadow: 0 0 10px #00ff00;
+}
+
+.highlight-streak {
+    color: #ffff00;
+    font-weight: bold;
+    text-shadow: 0 0 10px #ffff00;
+}
+
+.highlight-word {
+    color: #00ffff;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px #00ffff;
+}
+
+.reveal-word {
+    margin-top: 15px;
+    font-size: 1.1em;
+}
+
+/* Controls Hint */
+.controls {
+    margin-top: 20px;
+    font-size: 1.1em;
+    opacity: 0.8;
+}
+
+/* Utility Class */
+.hidden {
+    display: none !important;
+}
+
+/* Icons */
+.large-icon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 20px;
+    color: #00ffff;
+    text-shadow: 0 0 15px #00ffff;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+    .game-container {
+        padding: 20px;
+    }
+    h1 {
+        font-size: 2em;
+    }
+    .score-board {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .score-item {
+        width: 100%;
+        padding: 8px 10px;
+    }
+    .word-blanks {
+        font-size: 2.2em;
+        gap: 5px;
+    }
+    .hints-section {
+        margin-bottom: 20px;
+    }
+    .hint-label {
+        font-size: 1em;
+    }
+    .hints, .sentence-hint {
+        font-size: 0.85em;
+        padding: 8px 10px;
+    }
+    .answer-input {
+        font-size: 1.4em;
+        padding: 10px 15px;
+    }
+    .action-btn {
+        font-size: 1em;
+        padding: 10px 20px;
+    }
+    .large-icon {
+        width: 40px;
+        height: 40px;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>📚 Vocabuilder Challenge</h1>
+        <div class="instructions">
+            Guess the secret word. Hints will appear after incorrect attempts!
+        </div>
+
+        <div class="score-board">
+            <div class="score-item">
+                Attempts Left: <span id="attemptsLeft">6</span>
+            </div>
+            <div class="score-item">
+                Streak: <span id="streak">0</span>
+            </div>
+            <div class="score-item">
+                Solved: <span id="wordsSolved">0</span>
+            </div>
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <div id="startScreen" class="game-screen">
+                <i data-lucide="book-text" class="large-icon"></i>
+                <p>Ready to test your vocabulary?</p>
+                <button id="startGameBtn" class="action-btn primary-btn">Start Game</button>
+            </div>
+
+            <div id="gameActiveScreen" class="game-screen hidden">
+                <div class="word-blanks" id="wordBlanks">
+                    </div>
+
+                <div class="hints-section">
+                    <p class="hint-label">Similar Words:</p>
+                    <div id="synonymHints" class="hints">
+                        <span class="hint-placeholder">_ _ _ _</span>
+                    </div>
+                    <p class="hint-label">Opposites:</p>
+                    <div id="antonymHint" class="hints">
+                        <span class="hint-placeholder">_ _ _ _</span>
+                    </div>
+                    <p class="hint-label">In a Sentence:</p>
+                    <div id="sentenceHint" class="hints sentence-hint">
+                        <span class="hint-placeholder">_ _ _ _ _ _ _ _ _ _ _</span>
+                    </div>
+                </div>
+
+                <input
+                    type="text"
+                    id="userInput"
+                    class="answer-input"
+                    placeholder="Type your guess..."
+                    maxlength="15"
+                    autocomplete="off"
+                />
+                <button id="submitBtn" class="action-btn primary-btn">Guess</button>
+            </div>
+
+            <div id="gameOverScreen" class="game-screen hidden">
+                <i data-lucide="pencil-ruler" class="large-icon"></i>
+                <h2>Game Over!</h2>
+                <p id="finalStatusMessage" class="feedback"></p>
+                <p>Words Solved: <span id="finalWordsSolved" class="highlight-score">0</span></p>
+                <p>Longest Streak: <span id="finalLongestStreak" class="highlight-streak">0</span></p>
+                <p class="reveal-word hidden">The word was: <span id="revealedWord" class="highlight-word"></span></p>
+                <button id="playAgainBtn" class="action-btn primary-btn">Play Again</button>
+                <button id="resetGameBtn" class="action-btn secondary-btn">Reset Game</button>
+            </div>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+
+        <div class="controls">
+            Press ENTER to submit your guess
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- DOM Elements ---
+    const attemptsLeftDisplay = document.getElementById('attemptsLeft');
+    const streakDisplay = document.getElementById('streak');
+    const wordsSolvedDisplay = document.getElementById('wordsSolved');
+
+    const startScreen = document.getElementById('startScreen');
+    const gameActiveScreen = document.getElementById('gameActiveScreen');
+    const gameOverScreen = document.getElementById('gameOverScreen');
+
+    const wordBlanksDisplay = document.getElementById('wordBlanks');
+    const synonymHintsDisplay = document.getElementById('synonymHints');
+    const antonymHintDisplay = document.getElementById('antonymHint');
+    const sentenceHintDisplay = document.getElementById('sentenceHint');
+
+    const userInput = document.getElementById('userInput');
+    const submitBtn = document.getElementById('submitBtn');
+
+    const feedbackDisplay = document.getElementById('feedback');
+    const finalStatusMessage = document.getElementById('finalStatusMessage');
+    const finalWordsSolvedDisplay = document.getElementById('finalWordsSolved');
+    const finalLongestStreakDisplay = document.getElementById('finalLongestStreak');
+    const revealedWordDisplayContainer = document.querySelector('.reveal-word');
+    const revealedWordDisplay = document.getElementById('revealedWord');
+
+    const startGameBtn = document.getElementById('startGameBtn');
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const resetGameBtn = document.getElementById('resetGameBtn');
+    const date = new Date();
+
+ 
+    // --- Game State ---
+    let gameState = {
+        isPlaying: false,
+        attempts: 0,
+        maxAttempts: 6,
+        currentStreak: 0,
+        longestStreak: 0,
+        wordsSolved: 0,
+        secretWord: '',
+        currentWordMeaning: null, // Stores API response for the current word
+        revealedSynonyms: 0, // Track how many synonyms are revealed (0, 1, or 2)
+        hasRevealedAntonym: false,
+        hasRevealedSentence: false,
+    };
+
+    // Words chosen for guaranteed hints (can expand this list)
+    // Avoid very common words that might have too many meanings or no antonyms
+    // Added more words, especially those with good synonym/antonym/example diversity.
+    const potentialWords = [
+        "ADAPT", "AMPLIFY", "ANCIENT", "BENEFIT", "CAPABLE", "CLARIFY", "COMPLEX", "CONCISE",
+        "DEPRIVE", "DETER", "ELEGANT", "EMPHASIS", "ENHANCE", "EXPAND", "GENUINE", "HAZARD",
+        "IMPACT", "INCITE", "INNOVATE", "INSIGHT", "JUDICIOUS", "LAMENT", "MAGNIFY", "MITIGATE",
+        "NOURISH", "OBSCURE", "OPTIMAL", "PERSIST", "PRECIOUS", "QUIESCENT", "REDUNDANT", "RESOLVE",
+        "SERENE", "SIMPLIFY", "SUBTLE", "TANGIBLE", "TRANSIENT", "UNIQUE", "VALIDATE", "VIBRANT",
+        "WAIVER", "WARY", "ZEALOUS", "ABUNDANT", "CRUCIAL", "EXPLICIT", "FLEXIBLE", "GRADUAL",
+        "HOSTILE", "IMPLICIT", "JOVIAL", "KEEN", "LUCID", "MYSTERY", "NEUTRAL", "OBVIOUS",
+        "POTENT", "QUAINT", "RESILIENT", "STAGNANT", "TRANQUIL", "VAGUE", "ALLEVIATE", "COMPLACENT",
+        "DEFIANT", "ELUSIVE", "FUTILE", "GRUESOME", "INGENIOUS", "JUBILANT", "LUDICROUS", "METICULOUS",
+        "NOCTURNAL", "OBLIVIOUS", "PERVASIVE", "QUIBBLE", "RETICENT", "SPORADIC", "TRENCHANT", "UNWIELDY",
+        "VERBOSE", "VINDICATE", "WHIMSICAL", "YIELDING"
+    ];
+
+    const API_URL = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
+
+    // --- Helper Functions ---
+
+    // Fetches word data from the dictionary API
+    async function fetchWordData(word) {
+        try {
+            const response = await fetch(`${API_URL}${word.toLowerCase()}`);
+            if (!response.ok) {
+                console.warn(`Word '${word}' not found or no data available in API.`);
+                return null;
+            }
+            const data = await response.json();
+            return data[0]; // Take the first entry for simplicity
+        } catch (error) {
+            console.error('Error fetching word data:', error);
+            return null;
+        }
+    }
+
+
+    // Picks a random word and fetches its data, ensuring it has hints
+    async function selectSecretWord() {
+    const today = new Date();
+    const dateString = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+
+    // Hash function to get a number from date string
+    function hashString(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            hash = (hash << 5) - hash + str.charCodeAt(i);
+            hash |= 0; // Convert to 32-bit integer
+        }
+        return Math.abs(hash);
+    }
+
+    const index = hashString(dateString) % potentialWords.length;
+    const selectedWord = potentialWords[index];
+
+    const data = await fetchWordData(selectedWord);
+
+    if (data && data.meanings && data.meanings.length > 0) {
+        const hasEnoughSynonyms = data.meanings.some(m => m.synonyms && m.synonyms.length >= 2);
+        const hasAntonym = data.meanings.some(m => m.antonyms && m.antonyms.length >= 1);
+        const hasExample = data.meanings.some(m =>
+            m.definitions && m.definitions.some(d => d.example && d.example.toLowerCase().includes(selectedWord.toLowerCase()))
+        );
+
+        if (hasEnoughSynonyms && hasAntonym && hasExample) {
+            gameState.secretWord = selectedWord.toUpperCase();
+            gameState.currentWordMeaning = data;
+            return;
+        }
+    }
+
+    // Fallback word
+    gameState.secretWord = "GUESS";
+    gameState.currentWordMeaning = {
+        word: "guess",
+        meanings: [{
+            synonyms: ["estimate", "surmise", "conjecture"],
+            antonyms: ["know", "prove"],
+            definitions: [{ example: "Can you guess the secret word?" }]
+        }]
+    };
+    showFeedback("Warning: Fallback word used due to missing data.", "warning");
+}
+
+
+
+
+    // Displays blanks for the word
+    function displayWordBlanks() {
+        wordBlanksDisplay.innerHTML = '';
+        for (let i = 0; i < gameState.secretWord.length; i++) {
+            wordBlanksDisplay.innerHTML += '_';
+        }
+    }
+
+    // Clears all hint displays
+    function clearHints() {
+        synonymHintsDisplay.innerHTML = '<span class="hint-placeholder">_ _ _ _</span>';
+        antonymHintDisplay.innerHTML = '<span class="hint-placeholder">_ _ _ _</span>';
+        sentenceHintDisplay.innerHTML = '<span class="hint-placeholder">_ _ _ _ _ _ _ _ _ _ _</span>';
+    }
+
+    // Reveals hints based on game state (number of incorrect attempts)
+    function revealHints() {
+        const meanings = gameState.currentWordMeaning.meanings;
+
+        // Find all synonyms, antonyms, and example sentences
+        let allSynonyms = [];
+        let allAntonyms = [];
+        let exampleSentence = null;
+
+        for (const meaning of meanings) {
+            if (meaning.synonyms) allSynonyms.push(...meaning.synonyms);
+            if (meaning.antonyms) allAntonyms.push(...meaning.antonyms);
+            if (meaning.definitions) {
+                for (const def of meaning.definitions) {
+                    if (def.example && def.example.toLowerCase().includes(gameState.secretWord.toLowerCase())) {
+                        exampleSentence = def.example;
+                        break;
+                    }
+                }
+            }
+            if (exampleSentence && allSynonyms.length >= 2 && allAntonyms.length >= 1) {
+                // Found enough data across meanings
+                break;
+            }
+        }
+
+        // Limit synonyms to unique ones and ensure we have at least two
+        allSynonyms = [...new Set(allSynonyms)].filter(s => s.toLowerCase() !== gameState.secretWord.toLowerCase());
+        while (allSynonyms.length < 2) { // Ensure at least 2 placeholders if not enough real synonyms
+             allSynonyms.push("..."); // Placeholder if not enough unique synonyms
+        }
+
+        // Limit antonyms to unique ones and ensure we have at least one
+        allAntonyms = [...new Set(allAntonyms)].filter(a => a.toLowerCase() !== gameState.secretWord.toLowerCase());
+        while (allAntonyms.length < 1) { // Ensure at least 1 placeholder if no real antonyms
+             allAntonyms.push("..."); // Placeholder
+        }
+
+
+        // Reveal hints based on attempts
+        if (gameState.attempts >= 1) { // Reveal Synonym 1 after 1st incorrect
+            synonymHintsDisplay.innerHTML = `<span>${allSynonyms[0]}</span>`;
+            if (allSynonyms.length > 1) {
+                synonymHintsDisplay.innerHTML += `<span class="hint-placeholder">_ _ _ _</span>`; // Placeholder for 2nd synonym
+            }
+        }
+        if (gameState.attempts >= 2) { // Reveal Synonym 2 after 2nd incorrect
+            synonymHintsDisplay.innerHTML = `<span>${allSynonyms[0]}</span><span>${allSynonyms[1]}</span>`;
+        }
+        if (gameState.attempts >= 3) { // Reveal Antonym after 3rd incorrect
+            antonymHintDisplay.innerHTML = `<span>${allAntonyms[0]}</span>`;
+        }
+        if (gameState.attempts >= 4) { // Reveal Sentence after 4th incorrect
+            if (exampleSentence) {
+                const regex = new RegExp(gameState.secretWord, 'gi');
+                sentenceHintDisplay.textContent = exampleSentence.replace(regex, '____');
+            } else {
+                sentenceHintDisplay.textContent = 'No suitable example sentence found.';
+            }
+        }
+    }
+
+
+    function updateDisplay() {
+        attemptsLeftDisplay.textContent = gameState.maxAttempts - gameState.attempts;
+        streakDisplay.textContent = gameState.currentStreak;
+        wordsSolvedDisplay.textContent = gameState.wordsSolved;
+    }
+
+    function showFeedback(message, type) {
+        feedbackDisplay.textContent = message;
+        feedbackDisplay.className = `feedback ${type}`;
+        setTimeout(() => {
+            feedbackDisplay.textContent = '';
+            feedbackDisplay.className = 'feedback';
+        }, 1500);
+    }
+
+    // --- Game Logic ---
+
+    async function startGame() {
+        gameState.isPlaying = true;
+        gameState.attempts = 0;
+        gameState.revealedSynonyms = 0;
+        gameState.hasRevealedAntonym = false;
+        gameState.hasRevealedSentence = false;
+
+        // Reset UI elements
+        const todayKey = `solved_${dateString}`;
+        if (localStorage.getItem(todayKey)) {
+            endGame("You've already completed today's word!");
+            return;
+        }
+
+        userInput.value = '';
+        userInput.focus();
+        feedbackDisplay.textContent = '';
+        revealedWordDisplayContainer.classList.add('hidden'); // Hide revealed word
+        clearHints(); // Clear all hints initially
+
+        // Show active game screen, hide others
+        startScreen.classList.add('hidden');
+        gameOverScreen.classList.add('hidden');
+        gameActiveScreen.classList.remove('hidden');
+
+        showFeedback('Fetching a new word...', 'warning'); // User feedback during API call
+        await selectSecretWord(); // Wait for word data to be fetched
+        displayWordBlanks();
+        updateDisplay();
+        showFeedback('', ''); // Clear initial loading message
+    }
+
+    function checkGuess() {
+        if (!gameState.isPlaying) return;
+
+        const guess = userInput.value.toUpperCase().trim();
+        userInput.value = ''; // Clear input immediately
+
+        if (guess === '') {
+            showFeedback('Please enter a word!', 'warning');
+            return;
+        }
+
+        if (guess.length !== gameState.secretWord.length) {
+            showFeedback(`Word must be ${gameState.secretWord.length} letters long!`, 'warning');
+            gameState.attempts++; // Still count as an attempt if incorrect length
+            revealHints(); // Reveal hints on incorrect guess
+            updateDisplay();
+            if (gameState.attempts >= gameState.maxAttempts) {
+                endGame(`You ran out of attempts!`);
+            }
+            return;
+        }
+
+        if (guess === gameState.secretWord) {
+            showFeedback('Correct! Well done!', 'correct');
+            localStorage.setItem(todayKey, 'true');
+            endGame("You solved today's word!");
+        } else {
+            gameState.currentStreak = 0; // Break streak on incorrect guess
+            gameState.attempts++;
+            showFeedback('Incorrect guess. Try again!', 'incorrect');
+            revealHints(); // Reveal hints on incorrect guess
+
+            if (gameState.attempts >= gameState.maxAttempts) {
+                endGame(`You ran out of attempts!`);
+            }
+        }
+        updateDisplay();
+    }
+
+    function endGame(statusMessage) {
+        gameState.isPlaying = false;
+
+        // Show game over screen, hide others
+        gameActiveScreen.classList.add('hidden');
+        gameOverScreen.classList.remove('hidden');
+
+        finalStatusMessage.textContent = statusMessage;
+        finalWordsSolvedDisplay.textContent = gameState.wordsSolved;
+        finalLongestStreakDisplay.textContent = gameState.longestStreak;
+
+        // Reveal the word
+        revealedWordDisplay.textContent = gameState.secretWord;
+        revealedWordDisplayContainer.classList.remove('hidden');
+    }
+
+    function resetGame() {
+        gameState.isPlaying = false;
+        gameState.attempts = 0;
+        gameState.currentStreak = 0;
+        gameState.longestStreak = 0;
+        gameState.wordsSolved = 0;
+        gameState.secretWord = '';
+        gameState.currentWordMeaning = null;
+        gameState.revealedSynonyms = 0;
+        gameState.hasRevealedAntonym = false;
+        gameState.hasRevealedSentence = false;
+
+        // Reset UI to start screen
+        gameOverScreen.classList.add('hidden');
+        gameActiveScreen.classList.add('hidden');
+        startScreen.classList.remove('hidden');
+
+        wordBlanksDisplay.innerHTML = '';
+        clearHints(); // Ensure hints are cleared for a full reset
+        userInput.value = '';
+        feedbackDisplay.textContent = '';
+        revealedWordDisplayContainer.classList.add('hidden');
+
+        updateDisplay();
+    }
+
+    // --- Event Listeners ---
+    startGameBtn.addEventListener('click', startGame);
+    playAgainBtn.addEventListener('click', startGame);
+    resetGameBtn.addEventListener('click', resetGame);
+
+    submitBtn.addEventListener('click', checkGuess);
+
+    userInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            if (gameState.isPlaying && gameActiveScreen.classList.contains('hidden') === false) {
+                e.preventDefault(); // Prevent default Enter key behavior (e.g., form submission)
+                checkGuess();
+            } else if (!gameState.isPlaying && startScreen.classList.contains('hidden') === false) {
+                startGame();
+            }
+        }
+    });
+
+    // --- Initial Setup ---
+    updateDisplay(); // Set initial display values
+    clearHints(); // Ensure hints are hidden on load
+});
+    </script>
+      <script>
+        // Ensure Lucide icons are rendered after the DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>
