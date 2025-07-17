@@ -760,10 +760,8 @@
             document.getElementById('player-name').focus();
         }
 
-        // --- Keep saveScore, goHome, showScreen, showError, hideError as before ---
-        // Google Apps Script configuration
-        // Replace this with your deployed Apps Script web app URL
-        const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwQ79YsNvZPQ9Gp_9FyJFn9HSxHmwQxXNR0Szkej4w4q_rVr6n75H3BhuYYAuiXhH_8Xw/exec';
+
+        const APPS_SCRIPT_URL = process.env.APPS_SCRIPT_URL;
         
         let leaderboard = [];
         let textsLoaded = false;
