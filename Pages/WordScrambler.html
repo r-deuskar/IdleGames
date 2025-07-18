@@ -540,7 +540,7 @@
                 </svg>
                 </div>
                 <p class="subtitle">Ready to test your word skills?</p>
-                <button id="startGameBtn" class="btn">
+                <button id="startGameBtn" class="btn" disabled>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polygon points="5,3 19,12 5,21"/>
                     </svg>
@@ -626,47 +626,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Word List loaded from Words.json
             let wordList = [];
-
-            // JSON words list from resources folder
-            // fetch('../Resources/Words.json')
-            //     .then(response => response.json())
-            //     .then(words => {
-            //         // Remove duplicates and ensure all uppercase
-            //         wordList = Array.from(new Set(words.map(w => w.toUpperCase())));
-            //     })
-            //     .catch(err => {
-            //         // fallback: minimal list if fetch fails
-            //         wordList = [
-            //             'APPLE', 'BRAVE', 'CRANE', 'DRAPE', 'EAGLE', 'FLAME', 'GRAPE', 'HASTE', 'INLET', 'JOLLY', 'KNACK', 'LATCH', 'MIRTH', 'NOBLE', 'OCEAN', 'PRIDE', 'QUAKE', 'RAVEN', 'SHALE', 'TABLE', 'ULTRA', 'VIVID', 'WALTZ', 'XENON', 'YACHT', 'ZEBRA'
-            //         ];
-            //     });
-
-            fetch(APPS_SCRIPT_URL + '?action=getXSizedWords&howManyLetters=4', {
-            method: 'GET'
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.words && data.words.length > 0) {
-                    // Filter out empty texts
-                    const validWords = data.words.filter(word => word && word.trim().length > 0);
-                    if (validWords.length > 0) {
-                        wordList = Array.from(new Set(validWords.map(w => w.toUpperCase())));;
-                        wordsLoaded = true;
-                        hideError();
-                        console.log("List from Google Sheets: ",wordList);
-                        return true;
-                    }
-                }
-                throw new Error('No valid texts found in Google Sheets');
-            })
-            .catch(error => {
-                console.error('Error loading texts:', error);
-                showError('Failed to load typing texts from Google Sheets. Using fallback texts.');
-                wordList = [
-                        'APPLE', 'BRAVE', 'CRANE', 'DRAPE', 'EAGLE', 'FLAME', 'GRAPE', 'HASTE', 'INLET', 'JOLLY', 'KNACK', 'LATCH', 'MIRTH', 'NOBLE', 'OCEAN', 'PRIDE', 'QUAKE', 'RAVEN', 'SHALE', 'TABLE', 'ULTRA', 'VIVID', 'WALTZ', 'XENON', 'YACHT', 'ZEBRA'
-                    ];
-                return false;
-            });
+            
             // DOM Elements
             const timeLeftDisplay = document.getElementById('timeLeft');
             const scoreDisplay = document.getElementById('score');
@@ -702,6 +662,55 @@
             let timerInterval;
             let usedWords = new Set();
             let lastWord = '';
+
+            startGameBtn.disabled = true;
+            startGameBtn.textContent = 'Loading...';
+            
+            fetch(APPS_SCRIPT_URL + '?action=getXSizedWords&howManyLetters=4', {
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.words && data.words.length > 0) {
+                    // Filter out empty texts
+                    const validWords = data.words.filter(word => word && word.trim().length > 0);
+                    if (validWords.length > 0) {
+                        wordList = Array.from(new Set(validWords.map(w => w.toUpperCase())));;
+                        wordsLoaded = true;
+                        hideError();
+                        console.log("List from Google Sheets: ",wordList);
+                        startGameBtn.disabled = false;
+                        startGameBtn.textContent = 'Start Game';
+                        return true;
+                    }
+                }
+                throw new Error('No valid texts found in Google Sheets');
+            })
+            .catch(error => {
+                console.error('Error loading texts:', error);
+                showError('Failed to load typing texts from Google Sheets. Using fallback texts.');
+                wordList = [
+                    'APPLE', 'BRAVE', 'CRANE', 'DRAPE', 'EAGLE', 'FLAME', 'GRAPE', 'HASTE', 'INLET', 'JOLLY', 'KNACK', 'LATCH', 'MIRTH', 'NOBLE', 'OCEAN', 'PRIDE', 'QUAKE', 'RAVEN', 'SHALE', 'TABLE', 'ULTRA', 'VIVID', 'WALTZ', 'XENON', 'YACHT', 'ZEBRA'
+                ];
+                startGameBtn.disabled = false;
+                startGameBtn.textContent = 'Start Game';
+                return false;
+            });
+            
+            // JSON words list from resources folder
+            // fetch('../Resources/Words.json')
+            //     .then(response => response.json())
+            //     .then(words => {
+            //         // Remove duplicates and ensure all uppercase
+            //         wordList = Array.from(new Set(words.map(w => w.toUpperCase())));
+            //     })
+            //     .catch(err => {
+            //         // fallback: minimal list if fetch fails
+            //         wordList = [
+            //             'APPLE', 'BRAVE', 'CRANE', 'DRAPE', 'EAGLE', 'FLAME', 'GRAPE', 'HASTE', 'INLET', 'JOLLY', 'KNACK', 'LATCH', 'MIRTH', 'NOBLE', 'OCEAN', 'PRIDE', 'QUAKE', 'RAVEN', 'SHALE', 'TABLE', 'ULTRA', 'VIVID', 'WALTZ', 'XENON', 'YACHT', 'ZEBRA'
+            //         ];
+            //     });
+            
 
             // Helper to shuffle a word
             function scrambleWord(word) {
