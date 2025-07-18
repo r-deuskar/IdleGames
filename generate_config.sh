@@ -4,6 +4,8 @@
 # Find all the APPS_ environment variables in the environment
 declare -a customVars
 
+env | grep APPS_
+
 for key in $(env | awk -F "=" '{print $1}' | grep ".*APPS_.*")
 do
   customVars+=($key)
