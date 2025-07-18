@@ -495,6 +495,18 @@
             .nav-home { margin-left: 1rem; font-size: 1rem; padding: 0.4em 1em; }
         }
         body { padding-top: 70px !important; }
+       
+        .error-message {
+            color: #ff0040;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            background: rgba(255, 0, 64, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 0, 64, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -591,6 +603,7 @@
                     <button id="playAgainBtn" class="btn secondary">Skip and Play Again</button>
                 </div>
             </div>
+            <div id="error-display"></div>
         </div>
 
         <div class="instructions">
@@ -858,6 +871,16 @@
                 playAgainBtn.textContent = 'Play Again';
             }
 
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error-display');
+            errorDiv.innerHTML = `<div class="error-message">${message}</div>`;
+        }
+
+        function hideError() {
+            const errorDiv = document.getElementById('error-display');
+            errorDiv.innerHTML = '';
+        }
             // Event Listeners
             startGameBtn.addEventListener('click', startGame);
             playAgainBtn.addEventListener('click', resetGame);
