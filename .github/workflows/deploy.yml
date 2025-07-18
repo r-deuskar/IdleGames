@@ -20,6 +20,8 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run config
+        env:
+          APPS_SCRIPT_URL: ${{ secrets.APPS_SCRIPT_URL }}
         run: chmod +x ./generate_config.sh && ./generate_config.sh
 
       - name: Upload artifact for GitHub Pages
