@@ -411,7 +411,7 @@
     </div>
 
     <div class="debug-info" id="debugInfo"></div>
-
+    <script src="../config.js"></script>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -819,7 +819,7 @@
             saveScoreBtn.setAttribute('hidden', 'true');
             playAgainBtn.textContent = 'Play Again';
         }
-
+        const APPS_SCRIPT_URL = window.APPS_SCRIPT_URL;
         function saveScoreToGoogle(name, score) {
             const data = {
                 action: 'saveScore',
