@@ -27,7 +27,7 @@ jobs:
 
       # Runs a single command using the runners shell
       - name: Run config
-        run: ./generate_config.sh
+        run: chmod +x ./generate_config.sh
       - name: Deploy GitHub Pages site
         uses: actions/deploy-pages@v4.0.5
         with:
