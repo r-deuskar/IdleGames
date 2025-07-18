@@ -406,7 +406,7 @@
         />
         <div class="button-container">
             <button id="saveScoreBtn" class="btn">Save Score</button>
-            <button id="playAgainBtn" class="btn secondary">Play Again</button>
+            <button id="playAgainBtn" class="btn secondary">Skip & Play Again</button>
         </div>
     </div>
 
@@ -812,11 +812,33 @@
                 alert('Please enter a name to save your score');
                 return;
             }
-            console.log(userNameInput.value, score);
-            userNameInput.classList.add('hidden');
-            saveScoreBtn.classList.add('hidden');
+            saveScoreToGoogle(userNameInput.value, score).then(response => {
+                console.log(response);
+            });
+            userNameInput.setAttribute('hidden', 'true');
+            saveScoreBtn.setAttribute('hidden', 'true');
             playAgainBtn.textContent = 'Play Again';
         }
+
+        function saveScoreToGoogle(name, score) {
+            const data = {
+                action: 'saveScore',
+                game: 'AimTrainer',
+                name: name,
+                score: score,
+                date: new Date().toISOString()
+            };
+            
+            return fetch(APPS_SCRIPT_URL, {
+                redirect:"follow",
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain;charset=utf-8'
+                },
+                body: JSON.stringify(data)
+            });
+        }
+
         saveScoreBtn.addEventListener('click', saveScore);
         playAgainBtn.addEventListener('click', startGame);
 
