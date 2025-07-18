@@ -25,11 +25,10 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
-      # Runs a single command using the runners shell
       - name: Run config
         run: chmod +x ./generate_config.sh
-      - name: Deploy GitHub Pages site
+      
+      - name: Build and deploy to GitHub Pages
         uses: actions/deploy-pages@v4.0.5
-        with:
-          # GitHub token
-          token: ${{ github.token }}
+
+                
