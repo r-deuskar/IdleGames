@@ -816,7 +816,7 @@
                 console.log(response);
             });
             userNameInput.setAttribute('hidden', 'true');
-            saveScoreBtn.setAttribute('hidden', 'true');
+            saveScoreBtn.setAttribute('disabled', 'true');
             playAgainBtn.textContent = 'Play Again';
         }
         const APPS_SCRIPT_URL = window.APPS_SCRIPT_URL;
@@ -826,7 +826,7 @@
                 game: 'AimTrainer',
                 name: name,
                 score: score,
-                date: new Date().toISOString()
+                date: new Date().toISOString().replace('T', ' ').replace('Z', '').split('.')[0]
             };
             
             return fetch(APPS_SCRIPT_URL, {
